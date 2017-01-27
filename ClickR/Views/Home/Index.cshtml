@@ -17,7 +17,7 @@
 
     <div class="col-md-6">
         <input id="playerready" class="btn btn-default" type="button" value="Ready">
-        <input id="clickit" class="btn btn-default" type="button" value="Click"/>
+        <input id="clickit" class="btn btn-default" type="button" value="Click" />
         <ul id="playerinfo"></ul>
     </div>
 </div>
@@ -27,7 +27,6 @@
         <ul id="gameinfo"></ul>
     </div>
 </div>
-
 
 @section scripts {
     <!--Script references. -->
@@ -40,6 +39,11 @@
 
     <!--SignalR script to update the chat page and send messages.-->
     <script>
+
+        // Switch over to "const" ECMAScript 6 (using 5 now)
+        var usernameId = '#username';
+
+        // The following method will be called "OnLoad"
         $(function () {
 
             // Wanted to show that two hubs could be used on the same page.
@@ -52,9 +56,9 @@
             WireUpChatClient(chat);
             WireUpGameClient(game);
 
-            // TODO: Change the way the user name is retrieved.
+            // TODO: Change the way the user name is retrieved.  (Not a fan of the prompt)
             // Get the user name and store it to prepend to messages.
-            $('#username').val(prompt('Enter your name:', ''));
+            $(usernameId).val(prompt('Enter your name:', ''));
 
             // Set initial focus to message input box.
             $('#message').focus();
@@ -65,7 +69,7 @@
                 WireUpChatCommands(chat);
                 WireUpGameCommands(game);
 
-                game.server.ConnectPlayer($('#username').val());
+                game.server.ConnectPlayer(UserName());
             });
         });
 
@@ -94,7 +98,7 @@
             $('#sendmessage').click(function () {
 
                 // Call the server's Send method on the hub.
-                chatHub.server.send($('#username').val(), $('#message').val());
+                chatHub.server.send(UserName(), $('#message').val());
 
                 // Clear text box and reset focus for next comment.
                 $('#message').val('').focus();
@@ -110,11 +114,17 @@
                 gameinfo.empty();
 
                 gameinfo.append('<li>Game Name: <strong>' + htmlEncode(gameInfo.Name) + '</li>');
+                gameinfo.append('<li>Started: <strong>' + htmlEncode(gameInfo.Started) + '</li>');
 
                 $.each(gameInfo.RankedPlayers, function () {
                     var player = this;
 
-                    gameinfo.append('<li><strong>' + htmlEncode(player.Name) + '</strong>: ' + htmlEncode(player.ClickCount) + '</li>');
+                    gameinfo.append('<li><strong>' + htmlEncode(player.Name) + '</strong>: '
+                                                    + htmlEncode(player.ClickCount) + ' clicks | '
+                                                    + htmlEncode(player.ClicksPerSecond) + ' clicks / sec | '
+                                                     + htmlEncode(player.SpanMax) + ' FCS | '
+                                                    + htmlEncode(player.LastClick)
+                                                    + '</li>');
                 });
             };
 
@@ -125,6 +135,10 @@
                 playerinfo.empty();
                 playerinfo.append('<li>Name: <strong>' + htmlEncode(player.Name) + '</strong></li>');
                 playerinfo.append('<li>Click Count: <strong>' + htmlEncode(player.ClickCount) + '</strong></li>');
+                playerinfo.append('<li>Last Click: <strong>' + htmlEncode(player.LastClick) + '</strong></li>');
+                playerinfo.append('<li>Clicks / sec: <strong>' + htmlEncode(player.ClicksPerSecond) + '</strong></li>');
+                playerinfo.append('<li>Click span (' + htmlEncode(player.MaxClicks) + '): <strong>' + htmlEncode(player.SpanSeconds) + '</strong> seconds</li>');
+                playerinfo.append('<li>Fastest click span (' + htmlEncode(player.MaxClicks) + '): <strong>' + htmlEncode(player.SpanMax) + '</strong> seconds</li>');
             };
         }
 
@@ -134,16 +148,22 @@
             $('#clickit').click(function () {
 
                 // Call the server's ClickIt method on the hub.
-                gameHub.server.ClickIt($('#username').val());
+                gameHub.server.ClickIt(UserName());
             });
 
             // When player clicks the "imready" button
             $('#imready').click(function () {
 
                 // Call the server's ClickIt method on the hub.
-                gameHub.server.ImReady($('#username').val());
+                gameHub.server.ImReady(UserName());
             });
 
+        }
+
+        // Mimic a "Property" getter (only because I'm not a fan of the jQuery syntax - so hide this)
+        // This might make my code size larger
+        function UserName() {
+            return $(usernameId).val();
         }
 
     </script>

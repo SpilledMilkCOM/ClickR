@@ -12,14 +12,22 @@ namespace SignalRDemo.Models
 
         public Game()
         {
+            Name = "The Game";
+
             _players = new ConcurrentDictionary<string, Player>(StringComparer.OrdinalIgnoreCase);
+
+            Started = DateTime.UtcNow;
         }
+
+        public bool IsGameOn { get; set; }
+
+        public string Name { get; set; }
 
         public IEnumerable<Player> Players => _players.Values;
 
         public IEnumerable<Player> RankedPlayers => _players.Values.OrderByDescending(player => player.ClickCount);
 
-        public bool IsGameOn { get; set; }
+        public DateTime Started { get; private set; }
 
         public void AddPlayer(Player player)
         {

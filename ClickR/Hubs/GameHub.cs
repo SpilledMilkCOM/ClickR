@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNet.SignalR;
+﻿using System;
+using Microsoft.AspNet.SignalR;
 using Microsoft.AspNet.SignalR.Hubs;
 using SignalRDemo.Models;
 
@@ -17,13 +18,13 @@ namespace SignalRDemo.Hubs
 
             if (player != null)
             {
-                player.ClickCount++;
+                player.Clicked();
 
                 // This seems chatty.  Might want to create specific reponses to do certain things to reduce the chatter and total bandwidth.
+                // When sending data back you should consider HOW MUCH you're sending back.  Sending the entire player could be overkill.
 
                 Clients.Caller.refreshPlayerInfo(player);
                 Clients.All.refreshGameInfo(GameState.Instance.GameInfo);
-                //Clients.Caller.refreshGameInfo(GameState.Instance.GameInfo);
             }
         }
 

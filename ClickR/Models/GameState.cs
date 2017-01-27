@@ -30,7 +30,8 @@ namespace SignalRDemo.Models
 
         public IHubConnectionContext<GameHub> Clients { get; set; }
 
-        public GameModel GameInfo => new GameModel(_game);
+        //public GameModel GameInfo => new GameModel(_game);
+        public Game GameInfo => _game;
 
         public IGroupManager Groups { get; set; }
 
