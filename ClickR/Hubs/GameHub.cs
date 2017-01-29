@@ -11,10 +11,17 @@ namespace SignalRDemo.Hubs
     [HubName("GameHub")]  // If this is not named, then camel casing (gameHub) will be used in the JavaScript
     public class GameHub : Hub
     {
+        private IGameState GameState{ get; }
+
+        public GameHub(IGameState gameState)
+        {
+            GameState = gameState;
+        }
+
         [HubMethodName("ClickIt")]
         public void ClickIt(string userName)
         {
-            var player = GameState.Instance.GetPlayer(userName);
+            var player = GameState.GetPlayer(userName);
 
             if (player != null)
             {
@@ -24,7 +31,7 @@ namespace SignalRDemo.Hubs
                 // When sending data back you should consider HOW MUCH you're sending back.  Sending the entire player could be overkill.
 
                 Clients.Caller.refreshPlayerInfo(player);
-                Clients.All.refreshGameInfo(GameState.Instance.GameInfo);
+                Clients.All.refreshGameInfo(GameState.GameInfo);
             }
         }
 
@@ -35,11 +42,11 @@ namespace SignalRDemo.Hubs
         [HubMethodName("ConnectPlayer")]
         public void ConnectPlayer(string userName)
         {
-            var player = GameState.Instance.GetPlayer(userName);
+            var player = GameState.GetPlayer(userName);
 
             if (player == null)
             {
-                player = GameState.Instance.CreatePlayer(userName);
+                player = GameState.CreatePlayer(userName);
 
                 player.ConnectionId = Context.ConnectionId;
                 Clients.Caller.name = player.Name;
@@ -47,13 +54,13 @@ namespace SignalRDemo.Hubs
             }
 
             Clients.Caller.refreshPlayerInfo(player);
-            Clients.All.refreshGameInfo(GameState.Instance.GameInfo);
+            Clients.All.refreshGameInfo(GameState.GameInfo);
         }
 
         [HubMethodName("ImReady")]
         public void ImReady(string userName)
         {
-            var player = GameState.Instance.GetPlayer(userName);
+            var player = GameState.GetPlayer(userName);
 
             if (player != null)
             {
