@@ -9,31 +9,18 @@ using SignalRDemo.Hubs;
 namespace SignalRDemo.Models
 {
     // A Singleton to contain the game state.
-    public class GameState
+    public class GameState : IGameState
     {
-        // Only instanciate the game state when needed.
-        private readonly static Lazy<GameState> _instance = new Lazy<GameState>(() => new GameState(GlobalHost.ConnectionManager.GetHubContext<GameHub>()));
-
         // Instance variables
         // Only support a single game for now.
         private readonly Game _game;
 
-        private GameState(IHubContext context)
+        public GameState()
         {
             _game = new Game();
-
-            Clients = context.Clients as IHubConnectionContext<GameHub>;
-            Groups = context.Groups;
         }
 
-        public static GameState Instance => _instance.Value;
-
-        public IHubConnectionContext<GameHub> Clients { get; set; }
-
-        //public GameModel GameInfo => new GameModel(_game);
         public Game GameInfo => _game;
-
-        public IGroupManager Groups { get; set; }
 
         public Player CreatePlayer(string userName)
         {
